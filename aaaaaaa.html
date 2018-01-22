@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>test</title>
+    <style>
+    	* { padding: 0; margin: 0; }
+    	canvas { background: #fff; display: block; margin: 0 auto; display: none;}
+    </style>
+</head>
+<body>
+
+<canvas id="myCanvas" width="150" height="150" ></canvas>
+<image id="a"></image>
+<image id="b"></image>
+<image id="c"></image>
+<image id="d"></image>
+<image id="u"></image>
+<script>
+	var canvas=document.getElementById("myCanvas");
+	var canvascontext=canvas.getContext("2d");
+	canvascontext.fillStyle="#FF0000";
+	canvascontext.fillRect(0,0,50,50); 
+	document.getElementById("a").src = canvas.toDataURL();
+	canvascontext.fillRect(0,51,50,50); 
+	document.getElementById("b").src = canvas.toDataURL();
+	canvascontext.fillRect(51,0,50,50); 
+	document.getElementById("c").src = canvas.toDataURL();
+	canvascontext.fillRect(51,51,50,50);
+	document.getElementById("d").src = canvas.toDataURL();
+	
+	var img1 = new Image(); // HTML5 Constructor
+	img1.src = canvas.toDataURL();
+	canvascontext.drawImage(img1,-25,-25,150,150);
+	document.getElementById("u").src = canvas.toDataURL();
+	
+</script>
+
+
+
+
+
+
+
+</body>
+</html>
