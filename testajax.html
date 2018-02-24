@@ -1,0 +1,25 @@
+<header>
+<script>
+var header = document.querySelector('header');
+var body = document.querySelector('body');
+
+var requestURL = 'http://localhost:8000/E:/王仁雋/[code/aaa.json';
+var request= new XMLHttpRequest();
+function aaa() {	
+	request.open('GET', requestURL);
+	request.responseType = 'json';
+	request.send();
+}
+request.onreadystatechange = function() {
+	if (request.readyState === XMLHttpRequest.DONE) {
+		var data = request.response;
+		body.innerHTML=JSON.stringify(data);
+	}
+}
+
+</script>
+</header>
+
+<body>
+<button type="button" onclick=aaa()>aaa</button>
+</body>
