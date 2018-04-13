@@ -1,0 +1,86 @@
+<html>
+	<head>
+		<title>Langton's ant</title>
+		<style>
+			table{
+				width:800px;
+				height:800px;
+				border:solid #999999;
+				margin:20px auto;
+			}
+			td.black{
+				background-color:#000000;
+			}
+			td.white{
+				background-color:#FFFFFF;
+			}
+			div{
+				margin:20px 50%;
+			}
+		</style>
+	</head>
+	<body>
+		<script>
+			var _2Dplane={height:100,width:100};
+			
+			var table=document.createElement("table");
+			document.getElementsByTagName("body")[0].appendChild(table);
+			table._tr=[];
+			for(var i=0;i<_2Dplane.height;i++){
+				table._tr[i]=document.createElement("tr");
+				table.appendChild(table._tr[i]);
+				table._tr[i]._td=[];
+				for(var j=0;j<_2Dplane.width;j++){
+					table._tr[i]._td[j]=document.createElement("td");
+					table._tr[i].appendChild(table._tr[i]._td[j]);
+					table._tr[i]._td[j].classList.add("white");
+				}
+			}
+			
+			var ant={
+				x:50,
+				y:50,
+				head:{
+					north:0,
+					east:1,
+					south:2,
+					west:3,
+					now:3,
+				}
+			};
+			
+			var i=0;
+			var div=document.createElement("div");
+			document.getElementsByTagName("body")[0].appendChild(div);
+
+			function update(){
+				if(table._tr[ant.x]._td[ant.y].classList.contains("black")){
+					ant.head.now=(ant.head.now+1)%4;
+				}
+				else if(table._tr[ant.x]._td[ant.y].classList.contains("white")){
+					ant.head.now=(ant.head.now+3)%4;
+				}
+				table._tr[ant.x]._td[ant.y].classList.toggle("white");
+				table._tr[ant.x]._td[ant.y].classList.toggle("black");
+				if(ant.head.now==ant.head.north){
+					ant.y=(ant.y+_2Dplane.height-1)%_2Dplane.height;
+				}
+				else if(ant.head.now==ant.head.east){
+					ant.x=(ant.x+1)%_2Dplane.width;
+				}
+				else if(ant.head.now==ant.head.south){
+					ant.y=(ant.y+1)%_2Dplane.height;
+				}
+				else if(ant.head.now==ant.head.west){
+					ant.x=(ant.x+_2Dplane.width-1)%_2Dplane.width;
+				}
+			}
+			
+			
+			
+			
+			setInterval(function(){update(); div.innerHTML=i++;},1);
+		</script>
+	</body>
+	
+</html>
