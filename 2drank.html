@@ -1,0 +1,157 @@
+<html>
+	<head>
+		<title>2D rank finding problem</title>
+		<style>
+			.container {
+				display: grid;
+				grid-template-columns: 800px auto;
+			}
+			.border{
+				border:1px solid;
+				float:center;
+			}
+			.data_add{
+				padding-top: 10px;
+				margin: 0px auto;
+				width: 200px;
+				float:center;
+			}
+			.data{
+				border:1px solid;
+				float:center;
+			}
+			.table{
+				margin: 10px auto;
+				float:center;
+			}
+			input[type=number]{
+				width: 75px;
+			}
+		</style>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/vue"></script>
+		<script>
+			var canvas,canvas_context;
+			var offset=10,dotsize=2;
+			var dots=[];
+			var datas;
+			$(function(){
+				canvas=$("canvas").get(0);
+				canvas_context=canvas.getContext('2d');
+
+				$("body").css({"margin":0});
+				$(".container").css({"width":$(document).width(),"height":$(document).height()-2});
+				$("style").text($("style").text().replace("800px",($(document).height()-2).toString()+"px"));
+				$("canvas").attr({"width": $(document).height()-2});
+				$("canvas").attr({"height": $(document).height()-2});
+
+				drawcoord();
+
+				datas=new Vue({
+					el: '#datas',
+					data: {
+						dotcount:1,
+						dots:[[0,0,""]]
+					},
+					methods:{
+						updatedatas:function(event){
+							var l=this.dots.length;
+							if(this.dotcount>l){
+								for(var i=l;i<this.dotcount;i++){
+									this.dots.push([0,0,""]);
+								}
+							}
+							else if(this.dotcount<l){
+								for(var i=l;i>this.dotcount;i--){
+									this.dots.pop();
+								}
+							}
+						},
+						updatedots:function(){
+							canvas.width = canvas.width;
+							drawcoord();
+							canvas_context.font="15px Arial";
+							for(var i=0;i<this.dots.length;i++){
+								var x=this.dots[i][0]+offset,y=canvas.height-offset-this.dots[i][1];
+								canvas_context.moveTo(x,y);
+								canvas_context.arc(x,y,dotsize, 0, 2*Math.PI, false);
+								canvas_context.fill();
+								canvas_context.fillText(this.dots[i][2].toString(),x+3,y-3);
+							}
+							canvas_context.stroke();
+						},
+						computerank:function(){
+							for(var i=0;i<this.dots.length;i++){
+								this.dots[i][2]=0;
+							}
+
+							this.dots.sort(function(a,b){return a[0]-b[0]});
+
+							Vue.set(this.dots,_2drankfinding(this.dots,0,this.dots.length-1));
+							this.updatedots();
+						}
+					}
+				});
+			});
+
+			function _2drankfinding(dots,begin,end){
+				if(begin>=end)
+					return;
+				var center= Math.floor((end+begin)/2);
+				_2drankfinding(dots,begin,center);
+				_2drankfinding(dots,center+1,end);
+
+				for(var i=center+1;i<=end;i++){
+					for(var j=begin;j<=center;j++){
+						if(dots[j][1]<dots[i][1])
+							dots[i][2]++;
+						else{
+							console.log(dots[j]);
+						}
+					}
+				}
+				return;
+			}
+
+			var drawcoord=function(){
+				canvas_context.fillStyle="white";
+				canvas_context.fillRect(0,0,canvas.height,canvas.width);
+				canvas_context.fillStyle="black";
+				canvas_context.moveTo(offset,0);
+				canvas_context.lineTo(offset,canvas.height);
+				canvas_context.moveTo(0,canvas.height-offset);
+				canvas_context.lineTo(canvas.width,canvas.height-offset);
+
+				canvas_context.font="15px Arial";
+				for(var i=0;i<canvas.width;i+=100){
+					canvas_context.moveTo(i+offset,canvas.height-offset/2);
+					canvas_context.lineTo(i+offset,canvas.height-offset/2*3);
+					canvas_context.fillText(i.toString(),i+offset+3,canvas.height-offset-3);
+					canvas_context.moveTo(offset/2,canvas.height-i-offset);
+					canvas_context.lineTo(offset/2*3,canvas.height-i-offset);
+					canvas_context.fillText(i.toString(),offset+3,canvas.height-i-offset-3);
+				}
+				canvas_context.stroke();
+			};
+		</script>
+	</head>
+	<body>
+		<div class="container">
+			<canvas class="border"></canvas>
+			<div id="datas" class="datas border" style="overflow-y: scroll;">
+				<div class="data_add">
+					Dot Count:<input type="number" min="0" v-model.number="dotcount" v-on:change="updatedatas">
+				</div>
+				<table class="table">
+					<tr class="data" v-for="dot in dots">
+						<td>(&nbsp;<input type="number" v-model.number="dot[0]" v-on:change="updatedots">&nbsp;,</td>
+						<td><input type="number" v-model.number="dot[1]" v-on:change="updatedots">&nbsp;)</td>
+						<td>Rank:{{dot[2]}}</td>
+					</tr>
+				</table>
+				<div class="data_add" style="border: 1px solid; text-align:center;" v-on:click="computerank">2D Rank Finding</div>
+			</div>
+		</div>
+		
+	</body>
+</html>
