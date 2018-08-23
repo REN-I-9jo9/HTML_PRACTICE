@@ -1,0 +1,122 @@
+<html>
+	<head>
+		<title>Puzzle Game</title>
+		<style>
+			#puzzle{
+				display: grid;
+				border:1px solid;
+				margin:10px auto;
+				width:800px;
+				height: 800px;
+			}
+			#originalimg{
+				display: none;
+			}
+			.origin{
+				display: none;
+			}
+		</style>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+		<script>
+			var gridside=3;
+			var base64img,canvases=[],originalimg,origin;
+			var reader  = new FileReader();
+			$(function(){
+				originalimg = document.querySelector('#originalimg');
+				origin=document.getElementsByClassName("origin")[0];
+				reader.onloadend = function () {
+					base64img=reader.result;
+					originalimg.src = base64img;
+				}
+				originalimg.onload=function () {
+					document.querySelector("#puzzle").innerHTML="";
+					document.querySelector("#puzzle").style["grid-template-rows"]="repeat("+gridside+","+800/gridside+"px)";
+					document.querySelector("#puzzle").style["grid-template-columns"]="repeat("+gridside+","+800/gridside+"px)";
+					for(var i=0;i<gridside*gridside;i++){
+						canvases[i]=origin.cloneNode(false);
+						canvases[i].classList.toggle("pieces");
+						canvases[i].classList.toggle("origin");
+						document.querySelector("#puzzle").appendChild(canvases[i]);
+					}
+
+					for(var i=0;i<gridside*gridside*5;i++){
+						var a=Math.floor(Math.random()*(gridside*gridside));
+						var b=(a+Math.floor(Math.random()*(gridside*gridside-1)))%(gridside*gridside);
+						var q=canvases[a];
+						canvases[a]=canvases[b];
+						canvases[b]=q;
+					}
+
+					for (var i = 0; i <gridside; i++) {
+						for (var j = 0; j <gridside; j++) {
+							var w=originalimg.width/gridside,l=originalimg.height/gridside;
+							canvases[i*gridside+j].width=w;
+							canvases[i*gridside+j].height=l;
+							canvases[i*gridside+j].style["width"]=800/gridside+"px";
+							canvases[i*gridside+j].style["height"]=800/gridside+"px";
+							if(i*gridside+j<(gridside*gridside-1)){
+								canvases[i*gridside+j].getContext('2d').drawImage(originalimg,-w*j,-l*i);
+							}
+							canvases[i*gridside+j].imgindex=i*gridside+j;
+						}
+					}
+					for(var i=0;i<gridside*gridside;i++){
+						document.getElementsByClassName("pieces")[i].gridindex=i;
+					}
+					var emptygrid=canvases[canvases.length-1];
+					document.getElementById("result").innerHTML="("+Math.floor(emptygrid.gridindex/gridside)+","+emptygrid.gridindex%gridside+")";
+				};
+			});
+			function previewFile(file) {
+				if(file.files[0]) 
+					reader.readAsDataURL(file.files[0]);
+			}
+			function move(c){
+				var emptygrid=canvases[canvases.length-1];
+				var moveable=false;
+				if(	(emptygrid.gridindex==c.gridindex+1&&emptygrid.gridindex%gridside!=0)||
+					(emptygrid.gridindex==c.gridindex-1&&c.gridindex%gridside!=0)||
+					(emptygrid.gridindex==c.gridindex+gridside)||
+					(emptygrid.gridindex==c.gridindex-gridside)){
+					console.log("moveable");
+					moveable=true;
+				}
+				else{
+					console.log("unmoveable");
+				}
+				if(moveable){
+					var q=emptygrid.gridindex;
+					emptygrid.gridindex=c.gridindex;
+					c.gridindex=q;
+					document.getElementById("puzzle").replaceChild(origin,emptygrid);
+					document.getElementById("puzzle").replaceChild(emptygrid,c);
+					document.getElementById("puzzle").replaceChild(c,origin);
+				}
+				var comp=true;
+				for(var i=0;i<canvases.length;i++){
+					if(canvases[i].gridindex!=canvases[i].imgindex){
+						comp=false;
+						break;
+					}
+				}
+				if(comp)
+					document.getElementById("result").innerHTML="Complete";
+				else
+					document.getElementById("result").innerHTML="("+Math.floor(emptygrid.gridindex/gridside)+","+emptygrid.gridindex%gridside+")";
+			}
+			function reset(i){
+				gridside=i;document.querySelector('#puzzle').innerHTML='';
+			}
+		</script>
+	</head>
+	<body>
+		<div style="width:550px; margin:0px auto;">
+			Column:<input type="number" value=3 min=3 onchange="reset(parseInt(this.value));">&emsp;
+			File:<input type="file" onchange="previewFile(this)">
+		</div>
+		<img id="originalimg" src="" height="auto">
+		<canvas class="origin" height=0 width=0 class="cutted" onclick="move(this)"></canvas>
+		<div id="puzzle"></div>
+		<div id="result" style="text-align: center;"></div>
+	</body>
+</html>
