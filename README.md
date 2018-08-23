@@ -10,3 +10,5 @@
 [2D Rank Finding Problem](https://ren-i-9jo9.github.io/HTML_PRACTICE/2drank.html)
 
 [Convex Hull Problem using Graham Scan](https://ren-i-9jo9.github.io/HTML_PRACTICE/convexhull.html)
+
+[Puzzle Game](https://ren-i-9jo9.github.io/HTML_PRACTICE/puzzle.html)
