@@ -1,0 +1,107 @@
+<html>
+	<head>
+		<title>I Don't Know What The Hell Is This</title>
+		<style>
+			.container {
+				display: grid;
+				grid-template-columns:auto 800px auto;
+			}
+			.border{
+				border:1px solid;
+				float:center;
+			}
+		</style>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/5.0.4/math.js"></script>
+		<script>
+			var urlParams;
+			(window.onpopstate = function () {
+				var match,
+					pl     = /\+/g,  // Regex for replacing addition symbol with a space
+					search = /([^&=]+)=?([^&]*)/g,
+					decode = function (s) { return decodeURIComponent(s.replace(pl, " ")); },
+					query  = window.location.search.substring(1);
+					urlParams = {};
+					while (match = search.exec(query))
+					urlParams[decode(match[1])] = decode(match[2]);
+			})();
+			var canvas,canvas_context,dotsize=1;
+			var linelength=parseInt(urlParams["linelength"])||50,side=parseInt(urlParams["side"])||8;
+			var T=Math.PI/180;
+			$(function(){
+				canvas=$("canvas").get(0);
+				canvas_context=canvas.getContext('2d');
+
+				$("body").css({"margin":0});
+				$(".container").css({"width":$(document).width(),"height":$(document).height()-2});
+				$("style").text($("style").text().replace("800px",($(document).height()-2).toString()+"px"));
+				$("canvas").attr({"width": $(document).height()-2});
+				$("canvas").attr({"height": $(document).height()-2});
+				var offset=$("canvas").attr("width")/2;
+				canvas_context.font="10px Arial";
+
+				canvas_context.moveTo(offset,offset);
+				canvas_context.arc(offset,offset,dotsize, 0, 2*Math.PI, false);
+				canvas_context.fillStyle="white";
+				canvas_context.fillRect(0,0,canvas.height,canvas.height);
+				canvas_context.fillStyle="black";
+
+				var dots=[],layer=[];
+				for(var i=0;i<side;i++){
+					layer[layer.length]=[0,0];
+				}
+				dots[dots.length]=layer;
+
+				var nowangle=360/side;
+				var rotation_matrix=[[Math.cos(nowangle*T),-Math.sin(nowangle*T)],[Math.sin(nowangle*T),Math.cos(nowangle*T)]];
+				
+				layer=[];
+				var vertice=[0,linelength];
+				for(var i=0;i<side;i++){
+					vertice=math.multiply(rotation_matrix,vertice);
+					layer[layer.length]=vertice;
+				}
+				dots[dots.length]=layer;
+				nowangle=180-nowangle;
+				rotation_matrix=[[Math.cos(nowangle*T),-Math.sin(nowangle*T)],[Math.sin(nowangle*T),Math.cos(nowangle*T)]];
+
+				var a,b;
+				do{
+					layer=[];
+					for(var i=0;i<side;i++){
+						vertice=[
+						dots[dots.length-2][i][0]-dots[dots.length-1][i][0],
+						dots[dots.length-2][i][1]-dots[dots.length-1][i][1]];
+
+						vertice=math.multiply(rotation_matrix,vertice);
+						vertice=[dots[dots.length-1][i][0]+vertice[0],dots[dots.length-1][i][1]+vertice[1]];
+
+						layer[layer.length]=vertice;
+					}
+					dots[dots.length]=layer;
+					rotation_matrix=[[Math.cos(nowangle*T),-Math.sin(nowangle*T)],[Math.sin(nowangle*T),Math.cos(nowangle*T)]];
+					a=dots[dots.length-1][1],b=dots[dots.length-3][0];
+				}while(!(a[0]-b[0]<0.1&&a[1]-b[1]<0.1));
+
+				for(var i=1;i<dots.length;i++){
+					for(var j=0;j<dots[i].length;j++){
+						canvas_context.moveTo(offset+dots[i][j][0],offset+dots[i][j][1]);
+						canvas_context.lineTo(offset+dots[i-1][j][0],offset+dots[i-1][j][1]);
+						canvas_context.moveTo(offset+dots[i][j][0],offset+dots[i][j][1]);
+						canvas_context.lineTo(offset+dots[i-1][(j+dots[i].length-1)%dots[i].length][0],offset+dots[i-1][(j+dots[i].length-1)%dots[i].length][1]);
+					}
+				}
+
+				canvas_context.stroke();
+			});
+		</script>
+	</head>
+	<body>
+		<div class="container">
+			<div></div>
+			<canvas class="border"></canvas>
+			<div></div>
+		</div>
+		
+	</body>
+</html>
