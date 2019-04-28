@@ -1,0 +1,143 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Mandelbrot</title>
+</head>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.5.1/pixi.min.js"></script>
+<body style="margin:0px;">
+	<script type="text/javascript">
+		let type = "WebGL"
+		if(!PIXI.utils.isWebGLSupported()){
+			type = "canvas"
+		}
+
+		PIXI.utils.sayHello(type);
+
+		let app = new PIXI.Application({width: 256, height: 256});
+
+		document.body.appendChild(app.view);
+		app._options.forceCanvas=true;
+		app.renderer.view.style.position = "absolute";
+		app.renderer.view.style.display = "block";
+		app.renderer.autoResize = true;
+		app.renderer.resize(window.innerWidth, window.innerHeight);
+		let Setting={
+			Scale:350,
+			maxRepeat:50,
+			centerX:-0.3,
+			centerY:0
+		},UnrenderedSetting={
+			Scale:350,
+			maxRepeat:50,
+			centerX:-0.3,
+			centerY:0
+		};
+//=================================================================================================
+		let Mandelbrot=new PIXI.Graphics();
+		function drawMandelbrot(Scale,maxRepeat,centerX,centerY){
+			Mandelbrot.clear();
+			let timer=(new Date()).getTime();
+			Mandelbrot.transform.scale.y=-1;
+			Mandelbrot.transform.position.x=Math.floor(window.innerWidth/2)-centerX*Scale;
+			Mandelbrot.transform.position.y=Math.floor(window.innerHeight/2)-centerY*Scale;
+			app.stage.addChild(Mandelbrot);
+
+			function MandelbrotIteration (z,c) {
+				let n0=z[0]*z[0]-z[1]*z[1]+c[0];
+				let n1=z[0]*z[1]*2+c[1];
+				return [n0,n1];
+			}
+			function Abs(n,t){
+				return Math.sqrt(Math.pow(n[0]-t[0], 2)+Math.pow(n[1]-t[0], 2));
+			}
+			function Color(r,g,b){
+				r=Math.floor(Math.min(r,255));
+				g=Math.floor(Math.min(g,255));
+				b=Math.floor(Math.min(b,255));
+				return r*0x10000+g*0x100+b;
+			}
+			function Coloring(z,c,repeat){
+				let r=0x0,g=0x0,b=0x0;
+				let m=[c[0],c[1]]
+				let km=MandelbrotIteration(m,m);
+
+				r=(repeat)*4.5;
+				g=(repeat)*4.5;
+				b=(repeat)*4.5;
+				return Color(r,g,b);
+			}
+			for(let i=-Mandelbrot.transform.position.x;i<window.innerWidth-Mandelbrot.transform.position.x;i++){
+				for(let j=-(window.innerHeight-Mandelbrot.transform.position.y);j<Mandelbrot.transform.position.y;j++){
+					let c=[i/Scale,j/Scale];
+					let z=[c[0],c[1]];
+					let repeat=0;
+					while(repeat<=maxRepeat){
+						z=MandelbrotIteration(z,c);
+						if(Abs(z,[0,0])>2){
+							break;
+						}
+						repeat++;
+					}
+					Mandelbrot.beginFill(Coloring(z,c,repeat));
+					Mandelbrot.drawRect(i,j,1,1);
+					Mandelbrot.endFill();
+
+				}
+			}
+			console.log((new Date()).getTime()-timer);
+		}
+		drawMandelbrot(Setting.Scale,Setting.maxRepeat,Setting.centerX,Setting.centerY);
+
+//=================================================================================================
+		function DrawCoord(){
+			let Coord=new PIXI.Graphics();
+			Coord.transform.scale.y=-1;
+			Coord.transform.position.x=Math.floor(window.innerWidth/2)-centerX*Scale;
+			Coord.transform.position.y=Math.floor(window.innerHeight/2)-centerY*Scale;
+			app.stage.addChild(Coord);
+
+			Coord.lineStyle(1,0xff0000, 1);
+
+			Coord.beginFill(0, 1);
+			Coord.moveTo(0,Scale*2);
+			Coord.lineTo(0,-Scale*2);
+			Coord.moveTo(-Scale*2,0);
+			Coord.lineTo(Scale*2,0);
+			
+			for(let i=0;i<=2;i++){
+				Coord.moveTo(10,i*Scale);
+				Coord.lineTo(-10,i*Scale);
+				Coord.moveTo(10,-i*Scale);
+				Coord.lineTo(-10,-i*Scale);
+			}
+			for(let i=0;i<=2;i++){
+				Coord.moveTo(i*Scale,10);
+				Coord.lineTo(i*Scale,-10);
+				Coord.moveTo(-i*Scale,10);
+				Coord.lineTo(-i*Scale,-10);
+			}
+			
+	        Coord.endFill();
+	    }
+	    //DrawCoord();
+//=================================================================================================
+		function Set(t,v){
+			UnrenderedSetting[t]=v;
+		}
+		function Render(){
+			Setting['centerX']=UnrenderedSetting['centerX'];
+			Setting['centerY']=UnrenderedSetting['centerY'];
+			Setting['Scale']=UnrenderedSetting['Scale'];
+			drawMandelbrot(Setting.Scale,Setting.maxRepeat,Setting.centerX,Setting.centerY);
+		}
+//=================================================================================================
+	</script>
+	<div style="color: #ffffff; position: absolute;">
+		CenterX<input type="number" value="-0.3" oninput="Set('centerX',this.value)"><br>
+		CenterY<input type="number" value="0" oninput="Set('centerY',this.value)"><br>
+		Scale<input type="number" value="350" oninput="Set('Scale',this.value)"><br>
+		<input type="button" value="Render" onclick="Render()">
+	</div>
+</body>
+</html>
