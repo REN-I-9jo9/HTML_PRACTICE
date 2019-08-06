@@ -1,0 +1,99 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>_</title>
+	<script type="text/javascript" src="./Brainfuck.js"></script>
+	<style type="text/css">
+		.running{
+			background: #FF0000;
+		}
+		.SingleCommand{
+			display: inline-block;
+			text-align:center;
+			width:20px;
+			height: 20px;
+			margin: 3px 0px 3px 5px;
+			line-height: 20px;
+			font-size: 15px;
+			border: 1px solid;
+		}
+		.SingleData{
+			display: inline-block;
+			text-align:center;
+			width:60px;
+			height: 40px;
+			margin-left: 10px;
+			line-height: 40px;
+			font-size: 30px;
+			border: 1px solid;
+		}
+		.input{
+			height: 60px;
+			line-height: 60px;
+			font-size: 30px;
+			border: 1px solid;
+		}
+		.command{
+			font-size: 30px;
+			border: 1px solid;
+		}
+		.data{
+			height: 60px;
+			line-height: 60px;
+			font-size: 30px;
+			border: 1px solid;
+		}
+		.output{
+			height: 60px;
+			line-height: 60px;
+			font-size: 30px;
+			border: 1px solid;
+		}
+	</style>
+</head>
+<body>
+	<div id="Input" class="input" title="input"></div>
+	<div id="Command" class="command" title="command"></div>
+	<div id="Data" class="data" title="data"></div>
+	<div id="Output" class="output" title="output"></div>
+	<script type="text/javascript">
+		var B=new Brainfuck({command:"++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.",input:"1234"});
+
+
+		for(let i=0;i<B.Command.length;i++){
+			let m=document.createElement("div");
+			m.id="Command "+i;
+			m.innerHTML=B.Command[i];
+			if((i!=0&&i!=B.Command.length-1))
+				m.classList.add("SingleCommand");
+			document.getElementById("Command").appendChild(m);
+		}
+		var interval = setInterval(function(){
+			document.getElementById("Command "+B.commandptr).classList.remove("running");
+
+			B.run();
+
+			document.getElementById("Command "+B.commandptr).classList.add("running");
+
+			document.getElementById("Data").innerHTML="";
+			for(let j=0;j<B.data.length;j++){
+				let q=document.createElement("div");
+				q.innerHTML=B.data[j];
+				q.classList.add("SingleData");
+				if(j==B.ptr)
+					q.classList.add("running");
+				document.getElementById("Data").appendChild(q);
+			}
+			document.getElementById("Input").innerHTML="";
+			for(let j=0;j<B.Input.length;j++){
+				let q=document.createElement("div");
+				q.innerHTML=B.Input[j];
+				q.classList.add("SingleData");
+				document.getElementById("Input").appendChild(q);
+			}
+			document.getElementById("Output").innerHTML=B.output;
+		}, 50);
+	</script>
+</body>
+</html>
